@@ -1,0 +1,50 @@
+.TH detox 1 "May 2025" "detox.sh 1.0" "User Commands"
+.SH NAME
+detox \- scrub unwanted files from your data directory using pattern-based rules
+.SH SYNOPSIS
+.B detox
+[\fIOPTIONS\fR]
+
+.SH DESCRIPTION
+detox is a lightweight CLI utility designed to recursively remove unwanted or irrelevant files from a data directory. It applies customizable pattern-based rules to ensure that only relevant and meaningful files remain.
+
+This is particularly useful when working with scanned archives, converted text dumps, or noisy exports where useless files can clutter your workspace or pollute downstream pipelines.
+
+.SH OPTIONS
+.TP
+.BR -i ", " --input " <dir>"
+Directory to scan and clean. Defaults to \fB./data\fR.
+.TP
+.BR -o ", " --output " <dir>"
+Optional output directory for logs or reports. Defaults to \fB./output\fR.
+.TP
+.BR -d ", " --dry-run
+Print the list of files that would be removed, but do not delete anything.
+.TP
+.BR -v ", " --verbose
+Show additional details while processing.
+.TP
+.BR -r ", " --rules " <file>"
+Path to a custom rules file. Defaults to built-in patterns if not provided.
+.TP
+.BR -h ", " --help
+Show help message and exit.
+
+.SH CONFIGURATION
+detox sources its behavior and icon styling from a configuration file (\fBdetox.conf\fR) located alongside the script. This file defines emoji/icon mappings and presentation strings used in output.
+
+.SH USAGE EXAMPLES
+.TP
+.B detox
+Run with default settings using \fB./data\fR as input.
+.TP
+.B detox -i /mnt/scrapyard -d
+Preview what would be deleted from the target directory.
+.TP
+.B detox --rules rules/purge.txt --input archives/
+
+.SH AUTHOR
+Written by Blake Simpson.
+
+.SH LICENSE
+MIT License. See the LICENSE file for details.
