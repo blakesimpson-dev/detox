@@ -1,108 +1,68 @@
-# 🧼 detox.sh
+# detox
 
-> Clean your text files by removing binary and zero-width characters efficiently.
+![Bash 3.2+](https://img.shields.io/badge/Bash-3.2%2B-4eaa25?logo=gnubash&logoColor=white)
+![Perl 5](https://img.shields.io/badge/Perl-5-39457e?logo=perl&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
----
+Strips invisible junk from text files in place: control characters left
+behind by binary data, and zero-width characters (zero-width spaces and
+joiners, byte-order marks). Everything else, including accented letters, emoji
+and other non-ASCII text, is left byte-for-byte as it was.
 
-## 📦 Version
+## Install
 
-Version **1.3.5**
+Requires Bash 3.2+ and Perl 5, both of which ship with macOS and most Linux
+distributions.
 
----
-
-## 🚀 Usage
-
-```bash
-./detox.sh [OPTIONS]
+```sh
+git clone https://github.com/blakesimpson-dev/detox.git ~/tools/detox
 ```
 
-### Options
+Then add an alias to `~/.zshrc` or `~/.bashrc` and restart your shell:
 
-| Flag                | Description                                                     |
-|---------------------|-----------------------------------------------------------------|
-| `-i, --input <dir>` | Input directory containing `.txt` files (default: `./data`)     |
-| `-n, --dry-run`     | Show what would be cleaned without modifying files              |
-| `-d, --debug`       | Enable verbose debug output                                     |
-| `-y, --yes`         | Skip confirmation prompts                                       |
-| `--ignore-zwc`      | Skip zero-width character cleaning                              |
-| `--quiet`           | Suppress progress indicators and summary output                 |
-| `-h, --help`        | Show this help message                                          |
-| `-v, --version`     | Show detox version and exit                                     |
-
----
-
-## ⚙️ Features
-
-- **In-place cleaning**: Files are modified directly in the input directory
-- **Binary cleaning**: Removes control characters `\x00-\x08,\x0B,\x0C,\x0E-\x1F,\x7F`
-- **Zero-width cleaning**: Strips invisible Unicode characters like U+200B, U+FEFF
-- **Progress bar**: Visual feedback for batch operations
-- **Dry-run**: Preview changes without modifying files
-- **Interactive confirmation**: Prompt before each file or skip with `-y`
-- **Logging**:
-  - In-place clean log stored in `clean.log`
-  - Enhanced debug logging with per-file line diff stats (if enabled)
-  - `[CLEAN]` messages show below the progress bar during cleaning
-  - Any internal errors (e.g., Perl decode issues) are logged and deferred for post-clean review
-- **Quiet mode**: Disable on-screen progress and summary
-
----
-
-## 🧪 Testing
-
-**`detox.test.sh`**
-Automates test data creation and verifies cleaning logic:
-
-```bash
-bash detox.test.sh
+```sh
+alias detox="$HOME/tools/detox/detox.sh"
 ```
 
-Tests check for:
+detox reads `detox.conf` from its own folder, so run it in place (by alias, or
+with the folder on your `PATH`) rather than copying the script elsewhere.
 
-- Binary and ZWC removal
-- Preservation of already-clean files
-- Dry-run functionality
-- Log output
+## Usage
 
----
-
-## 🔧 Configuration
-
-Settings are loaded from **`detox.conf`**:
-
-```bash
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-YELLOW="\033[0;33m"
-BLUE="\033[0;34m"
-RESET="\033[0m"
-
-PERL_BINARY_REGEX='s/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]//g'
-PERL_ZWC_REGEX='s/[\x{200B}\x{200C}\x{200D}\x{FEFF}]//g'
-PERL_COMBINED_REGEX='s/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]//g; s/\x{200B}|\x{200C}|\x{200D}|\x{FEFF}//g'
+```sh
+detox -i ~/notes -n   # preview what would change
+detox -i ~/notes -y   # clean everything without prompting
 ```
 
----
+| Option              | Purpose                                       |
+| ------------------- | --------------------------------------------- |
+| `-i, --input <dir>` | Folder to scan for `.txt` files (`./data`)    |
+| `-n, --dry-run`     | Show what would be cleaned, change nothing    |
+| `-y, --yes`         | Clean without asking for each file            |
+| `-d, --debug`       | Report how many lines changed in each file    |
+| `--ignore-zwc`      | Only remove control characters                |
+| `--quiet`           | Hide the progress bar                         |
+| `-h, --help`        | Show help                                     |
+| `-v, --version`     | Show the version                              |
 
-## 📁 Project Structure
+## How it works
 
-```text
-detox.sh         # Main cleaning script
-detox.conf       # Configuration file
-README.md        # This documentation
-LICENSE          # MIT License
-detox.test.sh    # Automated tests
-.gitattributes   # Git attributes
-.editorconfig    # Formatting rules
-.vscode/         # Editor settings
+- **Scan:** finds every `.txt` file under the input folder, recursively.
+- **Clean:** runs each through Perl in byte mode, so invalid or non-ASCII bytes
+  can't be mangled. Files already clean are left untouched.
+- **Write:** cleaned files are rewritten in place, keeping their permissions,
+  and listed in `clean.log` in the input folder.
+- **Configure:** colours and the two Perl substitutions live in `detox.conf`.
+
+## Batch runs
+
+`batcher.sh` runs detox on each subfolder of a directory, then renames the
+folder, replacing one string with another, to mark it done:
+
+```sh
+./batcher.sh ./datasets ./detox.sh _raw _clean -- --yes
 ```
 
----
+## License
 
-## 📄 License
-
-MIT License. See [LICENSE](./LICENSE) for details.
-
----
-
-_Last updated: Sun, May 25, 2025  06:32:33 PM_
+MIT, see [LICENSE](LICENSE).
